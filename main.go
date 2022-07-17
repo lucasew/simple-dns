@@ -71,11 +71,12 @@ func (s *SimpleDNS) handleFallback(w dns.ResponseWriter, r *dns.Msg) {
     }
     upstream := s.Upstreams[rand.Intn(len(s.Upstreams))]
     ret, _, err := c.Exchange(r, upstream)
-    msg := new(dns.Msg)
-    msg.Answer = ret.Answer
     if err != nil {
         log.Printf("upstream failed: %s", err.Error())
+        return
     }
+    msg := new(dns.Msg)
+    msg.Answer = ret.Answer
     msg.SetReply(r)
     w.WriteMsg(msg)
 }
