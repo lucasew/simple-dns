@@ -27,12 +27,16 @@ type DNSFilter interface {
 
 var records = map[string]string{
     "baguncinha.com": "69.69.69.69",
+    "gugou.com": "142.251.128.14",
 }
 
 func handleFallback(w dns.ResponseWriter, r *dns.Msg) {
-    log.Printf("fallback")
     c := new(dns.Client)
     c.Net = "udp"
+    if len(r.Question) > 0 {
+        q := r.Question[0]
+        log.Printf("fallback query: %s", q.String())
+    }
     ret, _, err := c.Exchange(r, "1.1.1.1:53")
     msg := new(dns.Msg)
     msg.Answer = ret.Answer
@@ -57,9 +61,10 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
             log.Printf("Query: %s", domain)
             ip, ok := records[domain]
             if ok {
+                log.Printf("found ip for %s: %s", domain, ip)
                 m.Answer = append(m.Answer, &dns.A{
                     Hdr: dns.RR_Header{
-                        Name: domain, 
+                        Name: q.Name, 
                         Rrtype: dns.TypeA,
                         Class: dns.ClassINET,
                         Ttl: 60,
@@ -70,7 +75,6 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
         }
     }
 
-    log.Printf("%d", len(m.Answer))
     // if len(m.Answer) == 0 {
     //     m.SetRcode(r, dns.RcodeNameError)
     // }
