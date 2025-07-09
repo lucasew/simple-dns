@@ -2,7 +2,7 @@ module github.com/lucasew/simple-dns
 
 go 1.23.0
 
-toolchain go1.24.4
+toolchain go1.24.5
 
 require github.com/miekg/dns v1.1.66
 
